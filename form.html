@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TDCP Visitor Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#16233F;
+    --navy-deep:#0E1830;
+    --gold:#E8A33D;
+    --rose:#C6427E;
+    --teal:#2F6E68;
+    --paper:#F7F2E7;
+    --ink:#1E1B16;
+    --line: rgba(30,27,22,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 20px 80px;}
+
+  /* Header: passport-stamp banner */
+  .banner{
+    background:var(--navy);
+    color:var(--paper);
+    padding:48px 20px 64px;
+    position:relative;
+    overflow:hidden;
+  }
+  .banner::after{
+    content:"";
+    position:absolute;
+    right:-60px; top:-60px;
+    width:220px; height:220px;
+    border-radius:50%;
+    background:radial-gradient(circle, var(--gold) 0%, transparent 70%);
+    opacity:0.35;
+  }
+  .banner-inner{max-width:720px;margin:0 auto;position:relative;}
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0 0 14px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(34px, 6vw, 48px);
+    line-height:1.05;
+    margin:0 0 12px;
+  }
+  .sub{
+    font-size:15px;
+    color:rgba(247,242,231,0.75);
+    max-width:44ch;
+    line-height:1.5;
+    margin:0;
+  }
+  .stamp{
+    position:absolute;
+    top:10px; right:10px;
+    width:84px; height:84px;
+    border:2px dashed rgba(232,163,61,0.7);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(8deg);
+    font-family:'Space Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-align:center;
+    color:var(--gold);
+    line-height:1.3;
+  }
+
+  /* Card */
+  .card{
+    background:#fff;
+    margin-top:-40px;
+    border-radius:18px;
+    padding:36px 28px;
+    box-shadow:0 24px 48px -20px rgba(14,24,48,0.25);
+    position:relative;
+  }
+  .field{margin-bottom:22px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:520px){.row2{grid-template-columns:1fr;}}
+
+  label{
+    display:block;
+    font-size:12px;
+    font-family:'Space Mono', monospace;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--navy);
+    margin-bottom:7px;
+  }
+  label .req{color:var(--rose);}
+  input, select, textarea{
+    width:100%;
+    font-family:'Work Sans', sans-serif;
+    font-size:15px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  input:focus, select:focus, textarea:focus{
+    border-color:var(--teal);
+    background:#fff;
+  }
+  textarea{resize:vertical;min-height:96px;}
+
+  /* Rating stamps */
+  .rating-group{display:flex;gap:10px;flex-wrap:wrap;}
+  .rating-opt{
+    flex:1;
+    min-width:56px;
+    text-align:center;
+    padding:12px 4px 10px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    cursor:pointer;
+    font-family:'Space Mono', monospace;
+    font-size:20px;
+    color:var(--navy);
+    background:var(--paper);
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+    user-select:none;
+  }
+  .rating-opt small{display:block;font-family:'Work Sans',sans-serif;font-size:9px;letter-spacing:.05em;margin-top:4px;color:rgba(30,27,22,0.5);text-transform:uppercase;}
+  .rating-opt.active{
+    border-color:var(--rose);
+    background:#fff;
+    transform:translateY(-2px);
+    box-shadow:0 8px 16px -8px rgba(198,66,126,0.5);
+  }
+
+  button{
+    width:100%;
+    margin-top:8px;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    background:var(--navy);
+    color:#fff;
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  button:hover{background:var(--navy-deep);}
+  button:active{transform:scale(0.99);}
+  button:disabled{opacity:0.6;cursor:not-allowed;}
+
+  .status{
+    margin-top:16px;
+    font-size:14px;
+    padding:12px 14px;
+    border-radius:10px;
+    display:none;
+  }
+  .status.ok{display:block;background:rgba(47,110,104,0.12);color:var(--teal);}
+  .status.err{display:block;background:rgba(198,66,126,0.12);color:var(--rose);}
+
+  .footer-note{
+    text-align:center;
+    font-size:12px;
+    color:rgba(30,27,22,0.45);
+    margin-top:24px;
+    font-family:'Space Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <div class="banner-inner">
+    <div class="stamp">TDCP<br>PUNJAB<br>★ ★ ★</div>
+    <p class="eyebrow">Tourism &amp; Development Corporation of Punjab</p>
+    <h1>Visitor Log &amp; Feedback</h1>
+    <p class="sub">Tell us a bit about your visit — it helps us take better care of the next traveller too.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <form class="card" id="visitForm">
+    <div class="row2">
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" name="name" required placeholder="Your name">
+      </div>
+      <div class="field">
+        <label>Contact Number <span class="req">*</span></label>
+        <input type="tel" name="contact" required placeholder="03XX-XXXXXXX">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label>CNIC / Passport No.</label>
+        <input type="text" name="idNumber" placeholder="XXXXX-XXXXXXX-X">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Date of Visit <span class="req">*</span></label>
+        <input type="date" name="visitDate" required>
+      </div>
+      <div class="field">
+        <label>Group Size</label>
+        <input type="number" name="groupSize" min="1" placeholder="e.g. 4">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Site Visited <span class="req">*</span></label>
+        <select name="site" required>
+          <option value="" disabled selected>Select a site</option>
+          <option>Murree Hills</option>
+          <option>Katas Raj Temples</option>
+          <option>Rohtas Fort</option>
+          <option>Derawar Fort</option>
+          <option>Cholistan Desert</option>
+          <option>Fort Munro</option>
+          <option>Lal Suhanra National Park</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>City of Origin</label>
+        <input type="text" name="origin" placeholder="e.g. Lahore">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Overall Experience <span class="req">*</span></label>
+      <div class="rating-group" id="ratingGroup">
+        <div class="rating-opt" data-value="1">1<small>Poor</small></div>
+        <div class="rating-opt" data-value="2">2<small>Fair</small></div>
+        <div class="rating-opt" data-value="3">3<small>Good</small></div>
+        <div class="rating-opt" data-value="4">4<small>Great</small></div>
+        <div class="rating-opt" data-value="5">5<small>Excellent</small></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Remarks / Review</label>
+      <textarea name="remarks" placeholder="What stood out? What could be better?"></textarea>
+    </div>
+
+    <button type="submit" id="submitBtn">Submit Feedback</button>
+    <div class="status" id="statusBox"></div>
+  </form>
+
+  <p class="footer-note">Your responses help TDCP improve visitor facilities across Punjab.</p>
+</div>
+
+<script>
+  // ⚠️ Replace with your deployed Apps Script Web App URL (see SETUP_GUIDE.md)
+  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzhfWByY_ZspqphdbMeUxOn6MZMakv-6jBLI1kj3sRncpPx3v1_opWNBcfVHDc3cG62uw/exec";
+
+  const form = document.getElementById('visitForm');
+  const ratingGroup = document.getElementById('ratingGroup');
+  const statusBox = document.getElementById('statusBox');
+  const submitBtn = document.getElementById('submitBtn');
+  let selectedRating = null;
+
+  ratingGroup.addEventListener('click', (e) => {
+    const opt = e.target.closest('.rating-opt');
+    if (!opt) return;
+    [...ratingGroup.children].forEach(c => c.classList.remove('active'));
+    opt.classList.add('active');
+    selectedRating = opt.dataset.value;
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusBox.className = 'status';
+    statusBox.textContent = '';
+
+    if (!selectedRating) {
+      statusBox.className = 'status err';
+      statusBox.textContent = 'Please select a rating before submitting.';
+      return;
+    }
+    if (ENDPOINT_URL.includes('PASTE_YOUR')) {
+      statusBox.className = 'status err';
+      statusBox.textContent = 'Backend URL not configured yet — see SETUP_GUIDE.md.';
+      return;
+    }
+
+    const fd = new FormData(form);
+    const payload = Object.fromEntries(fd.entries());
+    payload.rating = selectedRating;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      await fetch(ENDPOINT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Apps Script doesn't echo CORS headers on POST; no-cors avoids the browser blocking the request
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      });
+      // no-cors means we can't read the response, so we optimistically confirm
+      statusBox.className = 'status ok';
+      statusBox.textContent = 'Thank you! Your feedback has been recorded.';
+      form.reset();
+      [...ratingGroup.children].forEach(c => c.classList.remove('active'));
+      selectedRating = null;
+    } catch (err) {
+      statusBox.className = 'status err';
+      statusBox.textContent = 'Something went wrong. Please try again.';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Feedback';
+    }
+  });
+</script>
+
+</body>
+</html>
