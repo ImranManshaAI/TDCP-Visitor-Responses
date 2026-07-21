@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TDCP Visitor Log</title>
+<title>TDCP Office Intake</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
 <style>
@@ -25,13 +25,12 @@
     font-family:'Work Sans', sans-serif;
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:720px;margin:0 auto;padding:0 20px 80px;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px 80px;}
 
-  /* Header: passport-stamp banner */
   .banner{
     background:var(--navy);
     color:var(--paper);
-    padding:48px 20px 64px;
+    padding:40px 20px 56px;
     position:relative;
     overflow:hidden;
   }
@@ -44,7 +43,7 @@
     background:radial-gradient(circle, var(--gold) 0%, transparent 70%);
     opacity:0.35;
   }
-  .banner-inner{max-width:720px;margin:0 auto;position:relative;}
+  .banner-inner{max-width:760px;margin:0 auto;position:relative;}
   .eyebrow{
     font-family:'Space Mono', monospace;
     font-size:12px;
@@ -56,47 +55,42 @@
   h1{
     font-family:'Fraunces', serif;
     font-weight:600;
-    font-size:clamp(34px, 6vw, 48px);
+    font-size:clamp(30px, 5vw, 42px);
     line-height:1.05;
     margin:0 0 12px;
   }
   .sub{
-    font-size:15px;
+    font-size:14.5px;
     color:rgba(247,242,231,0.75);
-    max-width:44ch;
+    max-width:52ch;
     line-height:1.5;
     margin:0;
   }
-  .stamp{
-    position:absolute;
-    top:10px; right:10px;
-    width:84px; height:84px;
-    border:2px dashed rgba(232,163,61,0.7);
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transform:rotate(8deg);
-    font-family:'Space Mono', monospace;
-    font-size:10px;
-    letter-spacing:0.08em;
-    text-align:center;
-    color:var(--gold);
-    line-height:1.3;
-  }
 
-  /* Card */
   .card{
     background:#fff;
-    margin-top:-40px;
+    margin-top:-32px;
     border-radius:18px;
-    padding:36px 28px;
+    padding:34px 28px;
     box-shadow:0 24px 48px -20px rgba(14,24,48,0.25);
-    position:relative;
   }
-  .field{margin-bottom:22px;}
+
+  .section-label{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 14px;
+    padding-top:6px;
+    border-top:1px solid var(--line);
+  }
+  .card > .section-label:first-child{border-top:none;padding-top:0;}
+
+  .field{margin-bottom:20px;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  @media(max-width:520px){.row2{grid-template-columns:1fr;}}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  @media(max-width:560px){.row2,.row3{grid-template-columns:1fr;}}
 
   label{
     display:block;
@@ -108,6 +102,7 @@
     margin-bottom:7px;
   }
   label .req{color:var(--rose);}
+  label .opt{color:rgba(30,27,22,0.4);text-transform:none;font-family:'Work Sans',sans-serif;font-size:11px;}
   input, select, textarea{
     width:100%;
     font-family:'Work Sans', sans-serif;
@@ -124,32 +119,56 @@
     border-color:var(--teal);
     background:#fff;
   }
-  textarea{resize:vertical;min-height:96px;}
+  textarea{resize:vertical;min-height:80px;}
 
-  /* Rating stamps */
-  .rating-group{display:flex;gap:10px;flex-wrap:wrap;}
-  .rating-opt{
+  /* Sites checkbox grid */
+  .sites-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  @media(max-width:560px){.sites-grid{grid-template-columns:1fr;}}
+  .site-opt{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    cursor:pointer;
+    transition:border-color .12s ease, background .12s ease;
+  }
+  .site-opt:has(input:checked){
+    border-color:var(--rose);
+    background:#fff;
+  }
+  .site-opt input{width:auto;accent-color:var(--rose);}
+  .site-opt span{font-size:14.5px;}
+  .hint{font-size:12px;color:rgba(30,27,22,0.45);margin-top:8px;}
+  .hint.err{color:var(--rose);}
+
+  /* Toggle for additional service */
+  .toggle-group{display:flex;gap:10px;}
+  .toggle-opt{
     flex:1;
-    min-width:56px;
     text-align:center;
-    padding:12px 4px 10px;
+    padding:12px;
     border-radius:10px;
     border:1.5px solid var(--line);
     cursor:pointer;
-    font-family:'Space Mono', monospace;
-    font-size:20px;
-    color:var(--navy);
+    font-size:14px;
+    font-weight:500;
     background:var(--paper);
-    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+    transition:border-color .12s ease, background .12s ease;
     user-select:none;
   }
-  .rating-opt small{display:block;font-family:'Work Sans',sans-serif;font-size:9px;letter-spacing:.05em;margin-top:4px;color:rgba(30,27,22,0.5);text-transform:uppercase;}
-  .rating-opt.active{
-    border-color:var(--rose);
+  .toggle-opt.active{
+    border-color:var(--teal);
     background:#fff;
-    transform:translateY(-2px);
-    box-shadow:0 8px 16px -8px rgba(198,66,126,0.5);
+    color:var(--teal);
   }
+  #serviceDetailsField{display:none;margin-top:16px;}
 
   button{
     width:100%;
@@ -179,133 +198,141 @@
   }
   .status.ok{display:block;background:rgba(47,110,104,0.12);color:var(--teal);}
   .status.err{display:block;background:rgba(198,66,126,0.12);color:var(--rose);}
-
-  .footer-note{
-    text-align:center;
-    font-size:12px;
-    color:rgba(30,27,22,0.45);
-    margin-top:24px;
-    font-family:'Space Mono', monospace;
-  }
 </style>
 </head>
 <body>
 
 <div class="banner">
   <div class="banner-inner">
-    <div class="stamp">TDCP<br>PUNJAB<br>★ ★ ★</div>
-    <p class="eyebrow">Tourism &amp; Development Corporation of Punjab</p>
-    <h1>Visitor Log &amp; Feedback</h1>
-    <p class="sub">Tell us a bit about your visit — it helps us take better care of the next traveller too.</p>
+    <p class="eyebrow">TDCP · Office Use Only</p>
+    <h1>Visitor Intake — Bus Tour Desk</h1>
+    <p class="sub">Fill this in while assisting a walk-in visitor at the counter.</p>
   </div>
 </div>
 
 <div class="wrap">
-  <form class="card" id="visitForm">
+  <form class="card" id="intakeForm">
+
+    <p class="section-label">Visit Details</p>
+    <div class="row2">
+      <div class="field">
+        <label>Date of Office Visit <span class="req">*</span></label>
+        <input type="date" name="officeVisitDate" id="officeVisitDate" required>
+      </div>
+      <div class="field">
+        <label>Preferred Tour Date <span class="req">*</span></label>
+        <input type="date" name="preferredDate" required>
+      </div>
+    </div>
+
+    <p class="section-label">Visitor Details</p>
     <div class="row2">
       <div class="field">
         <label>Full Name <span class="req">*</span></label>
-        <input type="text" name="name" required placeholder="Your name">
+        <input type="text" name="name" required placeholder="Visitor's name">
       </div>
       <div class="field">
-        <label>Contact Number <span class="req">*</span></label>
+        <label>Phone Number <span class="req">*</span></label>
         <input type="tel" name="contact" required placeholder="03XX-XXXXXXX">
       </div>
     </div>
-
-    <div class="row2">
+    <div class="row3">
       <div class="field">
-        <label>Email</label>
-        <input type="email" name="email" placeholder="you@example.com">
+        <label>Group Size <span class="req">*</span></label>
+        <input type="number" name="groupSize" min="1" required placeholder="e.g. 4">
       </div>
       <div class="field">
-        <label>CNIC / Passport No.</label>
-        <input type="text" name="idNumber" placeholder="XXXXX-XXXXXXX-X">
-      </div>
-    </div>
-
-    <div class="row2">
-      <div class="field">
-        <label>Date of Visit <span class="req">*</span></label>
-        <input type="date" name="visitDate" required>
+        <label>City of Origin <span class="req">*</span></label>
+        <input type="text" name="origin" required placeholder="e.g. Multan">
       </div>
       <div class="field">
-        <label>Group Size</label>
-        <input type="number" name="groupSize" min="1" placeholder="e.g. 4">
+        <label>Email <span class="opt">(optional)</span></label>
+        <input type="email" name="email" placeholder="visitor@example.com">
       </div>
     </div>
-
-    <div class="row2">
-      <div class="field">
-        <label>Site Visited <span class="req">*</span></label>
-        <select name="site" required>
-          <option value="" disabled selected>Select a site</option>
-          <option>BWP Zoo</option>
-          <option>Centrel Library BWP</option>
-          <option>BWP Museum</option>
-          <option>Noor Mehal</option>
-          <option>SS World Park</option>
-          <option>DHA Park</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>City of Origin</label>
-        <input type="text" name="origin" placeholder="e.g. Lahore">
-      </div>
-    </div>
-
     <div class="field">
-      <label>Overall Experience <span class="req">*</span></label>
-      <div class="rating-group" id="ratingGroup">
-        <div class="rating-opt" data-value="1">1<small>Poor</small></div>
-        <div class="rating-opt" data-value="2">2<small>Fair</small></div>
-        <div class="rating-opt" data-value="3">3<small>Good</small></div>
-        <div class="rating-opt" data-value="4">4<small>Great</small></div>
-        <div class="rating-opt" data-value="5">5<small>Excellent</small></div>
+      <label>CNIC <span class="opt">(optional)</span></label>
+      <input type="text" name="idNumber" placeholder="XXXXX-XXXXXXX-X">
+    </div>
+
+    <p class="section-label">Sites to Visit</p>
+    <div class="field">
+      <label>Select at least one <span class="req">*</span></label>
+      <div class="sites-grid" id="sitesGrid">
+        <label class="site-opt"><input type="checkbox" name="sites" value="Bahawalpur Zoo"><span>Bahawalpur Zoo</span></label>
+        <label class="site-opt"><input type="checkbox" name="sites" value="Bahawalpur Library & Museum"><span>Bahawalpur Library &amp; Museum</span></label>
+        <label class="site-opt"><input type="checkbox" name="sites" value="Noor Mehal"><span>Noor Mehal</span></label>
+        <label class="site-opt"><input type="checkbox" name="sites" value="SS World Park"><span>SS World Park</span></label>
+        <label class="site-opt"><input type="checkbox" name="sites" value="DHA Park"><span>DHA Park</span></label>
+      </div>
+      <p class="hint" id="sitesHint">Tap all sites the visitor plans to cover on the bus tour.</p>
+    </div>
+
+    <p class="section-label">Additional Service</p>
+    <div class="field">
+      <label>Any additional service provided / requested? <span class="req">*</span></label>
+      <div class="toggle-group" id="serviceToggle">
+        <div class="toggle-opt" data-value="No">No</div>
+        <div class="toggle-opt" data-value="Yes">Yes</div>
+      </div>
+      <div id="serviceDetailsField">
+        <label style="margin-top:16px;">Service Details</label>
+        <textarea name="additionalServiceDetails" placeholder="e.g. wheelchair assistance, private guide, extra drop-off point..."></textarea>
       </div>
     </div>
 
+    <p class="section-label">Notes</p>
     <div class="field">
-      <label>Remarks / Review</label>
-      <textarea name="remarks" placeholder="What stood out? What could be better?"></textarea>
+      <label>Remarks / Info Provided to Visitor</label>
+      <textarea name="remarks" placeholder="What was explained to the visitor, any special requests, follow-ups needed..."></textarea>
     </div>
 
-    <button type="submit" id="submitBtn">Submit Feedback</button>
+    <button type="submit" id="submitBtn">Save Entry</button>
     <div class="status" id="statusBox"></div>
   </form>
-
-  <p class="footer-note">Your responses help TDCP improve visitor facilities across Punjab.</p>
 </div>
 
 <script>
   // ⚠️ Replace with your deployed Apps Script Web App URL (see SETUP_GUIDE.md)
-  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzhfWByY_ZspqphdbMeUxOn6MZMakv-6jBLI1kj3sRncpPx3v1_opWNBcfVHDc3cG62uw/exec";
+  const ENDPOINT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
-  const form = document.getElementById('visitForm');
-  const ratingGroup = document.getElementById('ratingGroup');
+  const form = document.getElementById('intakeForm');
   const statusBox = document.getElementById('statusBox');
   const submitBtn = document.getElementById('submitBtn');
-  let selectedRating = null;
+  const sitesHint = document.getElementById('sitesHint');
+  const serviceToggle = document.getElementById('serviceToggle');
+  const serviceDetailsField = document.getElementById('serviceDetailsField');
+  let additionalService = 'No';
 
-  ratingGroup.addEventListener('click', (e) => {
-    const opt = e.target.closest('.rating-opt');
+  // Default office visit date = today
+  document.getElementById('officeVisitDate').valueAsDate = new Date();
+
+  serviceToggle.addEventListener('click', (e) => {
+    const opt = e.target.closest('.toggle-opt');
     if (!opt) return;
-    [...ratingGroup.children].forEach(c => c.classList.remove('active'));
+    [...serviceToggle.children].forEach(c => c.classList.remove('active'));
     opt.classList.add('active');
-    selectedRating = opt.dataset.value;
+    additionalService = opt.dataset.value;
+    serviceDetailsField.style.display = additionalService === 'Yes' ? 'block' : 'none';
   });
+  // default to "No" selected
+  serviceToggle.children[0].classList.add('active');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     statusBox.className = 'status';
     statusBox.textContent = '';
 
-    if (!selectedRating) {
-      statusBox.className = 'status err';
-      statusBox.textContent = 'Please select a rating before submitting.';
+    const checkedSites = [...form.querySelectorAll('input[name="sites"]:checked')].map(c => c.value);
+    if (checkedSites.length === 0) {
+      sitesHint.classList.add('err');
+      sitesHint.textContent = 'Please select at least one site.';
       return;
+    } else {
+      sitesHint.classList.remove('err');
+      sitesHint.textContent = 'Tap all sites the visitor plans to cover on the bus tour.';
     }
+
     if (ENDPOINT_URL.includes('PASTE_YOUR')) {
       statusBox.className = 'status err';
       statusBox.textContent = 'Backend URL not configured yet — see SETUP_GUIDE.md.';
@@ -314,10 +341,11 @@
 
     const fd = new FormData(form);
     const payload = Object.fromEntries(fd.entries());
-    payload.rating = selectedRating;
+    payload.sites = checkedSites;
+    payload.additionalService = additionalService;
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
+    submitBtn.textContent = 'Saving…';
 
     try {
       await fetch(ENDPOINT_URL, {
@@ -326,18 +354,20 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
       });
-      // no-cors means we can't read the response, so we optimistically confirm
       statusBox.className = 'status ok';
-      statusBox.textContent = 'Thank you! Your feedback has been recorded.';
+      statusBox.textContent = 'Saved. Entry recorded successfully.';
       form.reset();
-      [...ratingGroup.children].forEach(c => c.classList.remove('active'));
-      selectedRating = null;
+      document.getElementById('officeVisitDate').valueAsDate = new Date();
+      [...serviceToggle.children].forEach(c => c.classList.remove('active'));
+      serviceToggle.children[0].classList.add('active');
+      additionalService = 'No';
+      serviceDetailsField.style.display = 'none';
     } catch (err) {
       statusBox.className = 'status err';
       statusBox.textContent = 'Something went wrong. Please try again.';
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Feedback';
+      submitBtn.textContent = 'Save Entry';
     }
   });
 </script>
