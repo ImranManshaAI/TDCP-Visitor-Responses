@@ -1,9 +1,12 @@
-# TDCP Visitor Feedback System — Setup Guide
+# TDCP Visitor Intake System — Setup Guide
+
+This is an **internal office tool** — staff fill it in at the counter while
+helping a walk-in visitor, it is not filled out by tourists themselves.
 
 Three pieces:
-1. **`form.html`** — public form tourists fill out
+1. **`form.html`** — intake form used by office staff
 2. **`Code.gs`** — backend (lives inside a Google Sheet, no server needed)
-3. **`dashboard.html`** — internal dashboard for TDCP staff
+3. **`dashboard.html`** — internal analytics dashboard for TDCP staff
 
 ## Step 1 — Create the Google Sheet backend
 
@@ -62,6 +65,6 @@ Pick whichever is easiest for you / TDCP's IT setup:
 
 ## Portfolio framing (for your resume/LinkedIn)
 
-> Designed and deployed an end-to-end visitor feedback system for TDCP (Tourism Development Corporation of Punjab) — a public-facing data collection form, a serverless Google Sheets backend, and a live analytics dashboard visualizing visitor demographics, ratings, and site-level trends.
+> Designed and deployed an internal visitor intake and analytics system for TDCP (Tourism Development Corporation of Punjab) — a staff-facing data entry tool, a serverless Google Sheets backend, and a live BI-style dashboard visualizing visitor demographics, site popularity, and service-request trends across the double-decker bus tour desk.
 
 This is a legitimate full-stack delivery story: frontend, a real backend/data layer, and a BI-style reporting layer — worth having in your portfolio even outside the AI/ML track, since it shows you can ship a complete product independently.
