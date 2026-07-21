@@ -91,7 +91,16 @@
   }
   td{padding:10px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
   tr:last-child td{border-bottom:none;}
-  .stars{color:var(--gold);letter-spacing:1px;}
+  .pill{
+    display:inline-block;
+    font-size:11px;
+    padding:3px 9px;
+    border-radius:20px;
+    font-family:'Space Mono',monospace;
+  }
+  .pill.yes{background:rgba(232,163,61,0.16);color:#8a5a15;}
+  .pill.no{background:rgba(30,27,22,0.07);color:rgba(30,27,22,0.5);}
+  .sites-cell{white-space:pre-line;font-size:12.5px;color:rgba(30,27,22,0.75);}
 
   .empty, .loading, .error{
     text-align:center;
@@ -109,7 +118,7 @@
   <div class="topbar-inner">
     <div>
       <p class="eyebrow">TDCP · Internal Analytics</p>
-      <h1>Visitor Insights Dashboard</h1>
+      <h1>Visitor Intake Dashboard</h1>
     </div>
     <button class="refresh-btn" onclick="loadData()">Refresh Data</button>
   </div>
@@ -121,7 +130,7 @@
 
 <script>
   // ⚠️ Replace with your deployed Apps Script Web App URL (see SETUP_GUIDE.md)
-  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzhfWByY_ZspqphdbMeUxOn6MZMakv-6jBLI1kj3sRncpPx3v1_opWNBcfVHDc3cG62uw/exec";
+  const ENDPOINT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
   const charts = {};
 
@@ -144,41 +153,46 @@
     }
   }
 
+  // "Sites Selected" cells look like "1. Bahawalpur Zoo\n2. Noor Mehal" — split back into a clean array
+  function parseSites(cell) {
+    if (!cell) return [];
+    return String(cell)
+      .split('\n')
+      .map(line => line.replace(/^\d+\.\s*/, '').trim())
+      .filter(Boolean);
+  }
+
   function render(rows) {
     const app = document.getElementById('app');
 
     if (rows.length === 0) {
-      app.innerHTML = '<div class="empty">No submissions yet. Once tourists start filling the form, insights will appear here.</div>';
+      app.innerHTML = '<div class="empty">No entries yet. Once staff start logging walk-in visitors, insights will appear here.</div>';
       return;
     }
 
     // --- KPIs ---
     const total = rows.length;
-    const avgRating = (rows.reduce((s, r) => s + (Number(r.Rating) || 0), 0) / total).toFixed(1);
-    const uniqueSites = new Set(rows.map(r => r['Site Visited']).filter(Boolean)).size;
-    const thisMonth = rows.filter(r => {
-      const d = new Date(r.Timestamp);
-      const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    }).length;
+    const totalVisitors = rows.reduce((s, r) => s + (Number(r['Group Size']) || 0), 0);
+    const uniqueCities = new Set(rows.map(r => r['Origin City']).filter(Boolean)).size;
+    const serviceRequests = rows.filter(r => String(r['Additional Service']).toLowerCase() === 'yes').length;
 
     // --- Aggregations ---
     const bySite = {};
     rows.forEach(r => {
-      const s = r['Site Visited'] || 'Unspecified';
-      bySite[s] = (bySite[s] || 0) + 1;
+      parseSites(r['Sites Selected']).forEach(s => { bySite[s] = (bySite[s] || 0) + 1; });
     });
     const siteEntries = Object.entries(bySite).sort((a,b) => b[1]-a[1]);
 
-    const byRating = {1:0,2:0,3:0,4:0,5:0};
+    const byCity = {};
     rows.forEach(r => {
-      const v = Math.round(Number(r.Rating));
-      if (byRating[v] !== undefined) byRating[v]++;
+      const c = r['Origin City'] || 'Unspecified';
+      byCity[c] = (byCity[c] || 0) + 1;
     });
+    const cityEntries = Object.entries(byCity).sort((a,b) => b[1]-a[1]).slice(0, 8);
 
     const byDate = {};
     rows.forEach(r => {
-      const d = new Date(r.Timestamp);
+      const d = new Date(r['Office Visit Date']);
       if (isNaN(d)) return;
       const key = d.toISOString().slice(0,10);
       byDate[key] = (byDate[key] || 0) + 1;
@@ -189,39 +203,39 @@
 
     app.innerHTML = `
       <div class="kpis">
-        <div class="kpi"><div class="label">Total Submissions</div><div class="value">${total}</div></div>
-        <div class="kpi"><div class="label">Average Rating</div><div class="value accent">${avgRating} / 5</div></div>
-        <div class="kpi"><div class="label">Sites Covered</div><div class="value">${uniqueSites}</div></div>
-        <div class="kpi"><div class="label">This Month</div><div class="value">${thisMonth}</div></div>
+        <div class="kpi"><div class="label">Total Entries</div><div class="value">${total}</div></div>
+        <div class="kpi"><div class="label">Total Visitors (Group Size)</div><div class="value accent">${totalVisitors}</div></div>
+        <div class="kpi"><div class="label">Origin Cities</div><div class="value">${uniqueCities}</div></div>
+        <div class="kpi"><div class="label">Additional Service Requests</div><div class="value">${serviceRequests}</div></div>
       </div>
 
       <div class="grid">
         <div class="panel">
-          <h2>Submissions Over Time</h2>
+          <h2>Office Visits Over Time</h2>
           <div class="chart-wrap"><canvas id="timeChart"></canvas></div>
         </div>
         <div class="panel">
-          <h2>Rating Distribution</h2>
-          <div class="chart-wrap"><canvas id="ratingChart"></canvas></div>
+          <h2>Top Origin Cities</h2>
+          <div class="chart-wrap"><canvas id="cityChart"></canvas></div>
         </div>
       </div>
 
       <div class="grid">
         <div class="panel">
-          <h2>Visits by Site</h2>
+          <h2>Site Popularity</h2>
           <div class="chart-wrap"><canvas id="siteChart"></canvas></div>
         </div>
         <div class="panel">
-          <h2>Recent Remarks</h2>
+          <h2>Recent Entries</h2>
           <table>
-            <thead><tr><th>Visitor</th><th>Site</th><th>Rating</th><th>Remark</th></tr></thead>
+            <thead><tr><th>#</th><th>Visitor</th><th>Sites</th><th>Extra Svc</th></tr></thead>
             <tbody>
               ${recent.map(r => `
                 <tr>
-                  <td>${escapeHtml(r.Name || '—')}</td>
-                  <td>${escapeHtml(r['Site Visited'] || '—')}</td>
-                  <td class="stars">${'★'.repeat(Math.round(Number(r.Rating)||0))}${'☆'.repeat(5-Math.round(Number(r.Rating)||0))}</td>
-                  <td>${escapeHtml(r.Remarks || '—')}</td>
+                  <td>${escapeHtml(r['S.No'] ?? '—')}</td>
+                  <td>${escapeHtml(r.Name || '—')}<br><span style="color:rgba(30,27,22,0.45);font-size:11.5px;">${escapeHtml(r['Origin City'] || '')}</span></td>
+                  <td class="sites-cell">${escapeHtml(r['Sites Selected'] || '—')}</td>
+                  <td><span class="pill ${String(r['Additional Service']).toLowerCase()==='yes' ? 'yes':'no'}">${escapeHtml(r['Additional Service'] || 'No')}</span></td>
                 </tr>
               `).join('')}
             </tbody>
@@ -230,14 +244,14 @@
       </div>
     `;
 
-    drawCharts(dateEntries, byRating, siteEntries);
+    drawCharts(dateEntries, cityEntries, siteEntries);
   }
 
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
-  function drawCharts(dateEntries, byRating, siteEntries) {
+  function drawCharts(dateEntries, cityEntries, siteEntries) {
     Object.values(charts).forEach(c => c && c.destroy());
 
     const navy = '#16233F', gold = '#E8A33D', rose = '#C6427E', teal = '#2F6E68';
@@ -263,19 +277,19 @@
       }
     });
 
-    charts.rating = new Chart(document.getElementById('ratingChart'), {
+    charts.city = new Chart(document.getElementById('cityChart'), {
       type: 'doughnut',
       data: {
-        labels: ['1★','2★','3★','4★','5★'],
+        labels: cityEntries.map(e => e[0]),
         datasets: [{
-          data: [1,2,3,4,5].map(k => byRating[k]),
-          backgroundColor: [rose, '#D97757', gold, '#7FA88F', teal],
+          data: cityEntries.map(e => e[1]),
+          backgroundColor: [navy, rose, gold, teal, '#7FA88F', '#D97757', '#8a5a9c', '#4a6fa5'],
           borderWidth: 0
         }]
       },
       options: {
         responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:11} } } }
+        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:10.5} } } }
       }
     });
 
