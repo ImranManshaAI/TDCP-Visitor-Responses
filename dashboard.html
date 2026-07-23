@@ -130,7 +130,7 @@
 
 <script>
   // ⚠️ Replace with your deployed Apps Script Web App URL (see SETUP_GUIDE.md)
-  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzgTvAq7nNLCltE0OJcYk0HlaEO7uwsyBca643BdVNiwmkQQn7rcmpRc80K8_TK3j7r/exec";
+  const ENDPOINT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
   const charts = {};
 
@@ -185,7 +185,8 @@
 
     const byCity = {};
     rows.forEach(r => {
-      const c = r['Origin City'] || 'Unspecified';
+      var raw = (r['Origin City'] || 'Unspecified').toString().trim();
+      var c = raw.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.substr(1).toLowerCase());
       byCity[c] = (byCity[c] || 0) + 1;
     });
     const cityEntries = Object.entries(byCity).sort((a,b) => b[1]-a[1]).slice(0, 8);
