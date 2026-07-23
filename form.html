@@ -30,7 +30,7 @@
   .banner{
     background:var(--navy);
     color:var(--paper);
-    padding:40px 20px 56px;
+    padding:44px 20px 84px;
     position:relative;
     overflow:hidden;
   }
@@ -44,6 +44,23 @@
     opacity:0.35;
   }
   .banner-inner{max-width:760px;margin:0 auto;position:relative;}
+  .stamp{
+    position:absolute;
+    top:6px; right:10px;
+    width:84px; height:84px;
+    border:2px dashed rgba(232,163,61,0.7);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(8deg);
+    font-family:'Space Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-align:center;
+    color:var(--gold);
+    line-height:1.3;
+  }
   .eyebrow{
     font-family:'Space Mono', monospace;
     font-size:12px;
@@ -69,9 +86,9 @@
 
   .card{
     background:#fff;
-    margin-top:-32px;
+    margin-top:-52px;
     border-radius:18px;
-    padding:34px 28px;
+    padding:40px 28px 34px;
     box-shadow:0 24px 48px -20px rgba(14,24,48,0.25);
   }
 
@@ -204,6 +221,7 @@
 
 <div class="banner">
   <div class="banner-inner">
+    <div class="stamp">TDCP<br>PUNJAB<br>★ ★ ★</div>
     <p class="eyebrow">TDCP · Office Use Only</p>
     <h1>Visitor Intake — Bus Tour Desk</h1>
     <p class="sub">Fill this in while assisting a walk-in visitor at the counter.</p>
@@ -236,18 +254,28 @@
         <input type="tel" name="contact" required placeholder="03XX-XXXXXXX">
       </div>
     </div>
-    <div class="row3">
+    <div class="row2">
       <div class="field">
         <label>Group Size <span class="req">*</span></label>
         <input type="number" name="groupSize" min="1" required placeholder="e.g. 4">
       </div>
       <div class="field">
-        <label>City of Origin <span class="req">*</span></label>
-        <input type="text" name="origin" required placeholder="e.g. Multan">
-      </div>
-      <div class="field">
         <label>Email <span class="opt">(optional)</span></label>
         <input type="email" name="email" placeholder="visitor@example.com">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Origin Country <span class="req">*</span></label>
+        <input type="text" id="originCountry" name="originCountry" list="countryList" required placeholder="Start typing..." value="Pakistan" autocomplete="off">
+        <datalist id="countryList">
+          <option value="Pakistan"><option value="Afghanistan"><option value="Albania"><option value="Algeria"><option value="Argentina"><option value="Armenia"><option value="Australia"><option value="Austria"><option value="Azerbaijan"><option value="Bahrain"><option value="Bangladesh"><option value="Belgium"><option value="Bhutan"><option value="Brazil"><option value="Brunei"><option value="Bulgaria"><option value="Cambodia"><option value="Canada"><option value="China"><option value="Colombia"><option value="Croatia"><option value="Cyprus"><option value="Czech Republic"><option value="Denmark"><option value="Egypt"><option value="Ethiopia"><option value="Finland"><option value="France"><option value="Georgia"><option value="Germany"><option value="Ghana"><option value="Greece"><option value="Hungary"><option value="Iceland"><option value="India"><option value="Indonesia"><option value="Iran"><option value="Iraq"><option value="Ireland"><option value="Israel"><option value="Italy"><option value="Japan"><option value="Jordan"><option value="Kazakhstan"><option value="Kenya"><option value="Kuwait"><option value="Kyrgyzstan"><option value="Lebanon"><option value="Libya"><option value="Malaysia"><option value="Maldives"><option value="Mexico"><option value="Morocco"><option value="Myanmar"><option value="Nepal"><option value="Netherlands"><option value="New Zealand"><option value="Nigeria"><option value="Norway"><option value="Oman"><option value="Philippines"><option value="Poland"><option value="Portugal"><option value="Qatar"><option value="Romania"><option value="Russia"><option value="Saudi Arabia"><option value="Singapore"><option value="Somalia"><option value="South Africa"><option value="South Korea"><option value="Spain"><option value="Sri Lanka"><option value="Sudan"><option value="Sweden"><option value="Switzerland"><option value="Syria"><option value="Tajikistan"><option value="Tanzania"><option value="Thailand"><option value="Tunisia"><option value="Turkey"><option value="Turkmenistan"><option value="UAE"><option value="Uganda"><option value="Ukraine"><option value="United Kingdom"><option value="United States"><option value="Uzbekistan"><option value="Vietnam"><option value="Yemen">
+        </datalist>
+      </div>
+      <div class="field">
+        <label>Origin City <span class="req">*</span></label>
+        <input type="text" id="originCity" name="origin" list="cityList" required placeholder="Start typing..." autocomplete="off">
+        <datalist id="cityList"></datalist>
       </div>
     </div>
     <div class="field">
@@ -294,7 +322,7 @@
 
 <script>
   // ⚠️ Replace with your deployed Apps Script Web App URL (see SETUP_GUIDE.md)
-  const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzgTvAq7nNLCltE0OJcYk0HlaEO7uwsyBca643BdVNiwmkQQn7rcmpRc80K8_TK3j7r/exec";
+  const ENDPOINT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
   const form = document.getElementById('intakeForm');
   const statusBox = document.getElementById('statusBox');
@@ -306,6 +334,69 @@
 
   // Default office visit date = today
   document.getElementById('officeVisitDate').valueAsDate = new Date();
+
+  // City suggestions per country. Countries not listed here fall back to free typing (no restriction, just no suggestions).
+  const CITY_DATA = {
+    "Pakistan": ["Bahawalpur","Karachi","Lahore","Faisalabad","Rawalpindi","Multan","Hyderabad","Gujranwala","Peshawar","Quetta","Islamabad","Sargodha","Sialkot","Sukkur","Larkana","Sheikhupura","Rahim Yar Khan","Jhang","Dera Ghazi Khan","Gujrat","Sahiwal","Wah Cantonment","Mardan","Kasur","Okara","Mingora","Nawabshah","Chiniot","Kotri","Kamoke","Hafizabad","Sadiqabad","Mirpur Khas","Burewala","Kohat","Khanewal","Dera Ismail Khan","Muzaffargarh","Abbottabad","Mandi Bahauddin","Shikarpur","Jacobabad","Jhelum","Khanpur","Khairpur","Muridke","Pakpattan","Chishtian","Daska","Bahawalnagar","Vehari","Ferozewala","Jaranwala","Attock","Muzaffarabad","Nowshera","Layyah","Chakwal","Wazirabad","Chichawatni","Kot Addu","Swabi","Toba Tek Singh","Hasilpur","Bhalwal","Kamalia","Gojra","Rajanpur","Gwadar","Charsadda","Zhob","Dadu","Umerkot","Sanghar","Ghotki","Shorkot","Kabirwala","Pattoki","Mianwali","Chaman","Sibi","Taxila","Kalat"],
+    "India": ["Mumbai","Delhi","Bangalore","Hyderabad","Ahmedabad","Chennai","Kolkata","Surat","Pune","Jaipur","Lucknow","Kanpur","Nagpur","Indore","Thane","Bhopal","Visakhapatnam","Patna","Vadodara","Ghaziabad","Ludhiana","Agra","Nashik","Faridabad","Meerut","Rajkot","Varanasi","Srinagar","Amritsar","Jodhpur","Chandigarh","Guwahati","Coimbatore","Kochi","Mysore","Jalandhar"],
+    "Afghanistan": ["Kabul","Kandahar","Herat","Mazar-i-Sharif","Jalalabad","Kunduz","Ghazni","Balkh"],
+    "Bangladesh": ["Dhaka","Chittagong","Khulna","Rajshahi","Sylhet","Comilla","Rangpur","Barisal"],
+    "China": ["Beijing","Shanghai","Guangzhou","Shenzhen","Chengdu","Kashgar","Urumqi","Xian","Hong Kong"],
+    "Iran": ["Tehran","Mashhad","Isfahan","Shiraz","Tabriz","Zahedan"],
+    "Iraq": ["Baghdad","Basra","Mosul","Erbil","Najaf","Karbala"],
+    "Saudi Arabia": ["Riyadh","Jeddah","Mecca","Medina","Dammam","Khobar","Taif"],
+    "UAE": ["Dubai","Abu Dhabi","Sharjah","Ajman","Al Ain","Fujairah","Ras Al Khaimah"],
+    "Qatar": ["Doha","Al Wakrah","Al Rayyan"],
+    "Oman": ["Muscat","Salalah","Sohar","Nizwa"],
+    "Kuwait": ["Kuwait City","Hawalli","Salmiya"],
+    "Bahrain": ["Manama","Riffa","Muharraq"],
+    "Turkey": ["Istanbul","Ankara","Izmir","Antalya","Bursa","Konya"],
+    "United Kingdom": ["London","Birmingham","Manchester","Bradford","Glasgow","Leeds","Liverpool","Edinburgh","Sheffield","Luton"],
+    "United States": ["New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego","Dallas","San Jose"],
+    "Canada": ["Toronto","Montreal","Vancouver","Calgary","Edmonton","Ottawa","Mississauga"],
+    "Australia": ["Sydney","Melbourne","Brisbane","Perth","Adelaide","Canberra","Gold Coast","Newcastle"],
+    "Germany": ["Berlin","Hamburg","Munich","Cologne","Frankfurt","Stuttgart"],
+    "France": ["Paris","Marseille","Lyon","Toulouse","Nice"],
+    "Malaysia": ["Kuala Lumpur","George Town","Johor Bahru","Ipoh","Shah Alam"],
+    "Indonesia": ["Jakarta","Surabaya","Bandung","Medan","Semarang"],
+    "Sri Lanka": ["Colombo","Kandy","Galle","Jaffna","Negombo"],
+    "Nepal": ["Kathmandu","Pokhara","Lalitpur","Biratnagar"],
+    "Egypt": ["Cairo","Alexandria","Giza","Luxor","Aswan"],
+    "South Africa": ["Johannesburg","Cape Town","Durban","Pretoria"],
+    "Singapore": ["Singapore"],
+    "New Zealand": ["Auckland","Wellington","Christchurch","Hamilton"],
+    "Thailand": ["Bangkok","Chiang Mai","Phuket","Pattaya"],
+    "Japan": ["Tokyo","Osaka","Yokohama","Nagoya","Kyoto"],
+    "South Korea": ["Seoul","Busan","Incheon","Daegu"],
+    "Italy": ["Rome","Milan","Naples","Turin","Florence"],
+    "Spain": ["Madrid","Barcelona","Valencia","Seville"],
+    "Russia": ["Moscow","Saint Petersburg","Novosibirsk","Kazan"]
+  };
+
+  const cityListEl = document.getElementById('cityList');
+  const originCountryEl = document.getElementById('originCountry');
+  const originCityEl = document.getElementById('originCity');
+  function refreshCityOptions(countryValue) {
+    const key = Object.keys(CITY_DATA).find(k => k.toLowerCase() === countryValue.trim().toLowerCase());
+    cityListEl.innerHTML = '';
+    if (key) {
+      CITY_DATA[key].forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        cityListEl.appendChild(opt);
+      });
+    }
+  }
+  refreshCityOptions(originCountryEl.value); // populate for the default "Pakistan"
+  originCountryEl.addEventListener('input', () => refreshCityOptions(originCountryEl.value));
+
+  // Normalize free-typed country/city text so "lahore" and "Lahore" don't end up as separate entries
+  function titleCase(str) {
+    return str.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  }
+  [originCountryEl, originCityEl].forEach(el => {
+    el.addEventListener('blur', () => { if (el.value.trim()) el.value = titleCase(el.value); });
+  });
 
   serviceToggle.addEventListener('click', (e) => {
     const opt = e.target.closest('.toggle-opt');
@@ -338,6 +429,9 @@
       statusBox.textContent = 'Backend URL not configured yet — see SETUP_GUIDE.md.';
       return;
     }
+
+    if (originCountryEl.value.trim()) originCountryEl.value = titleCase(originCountryEl.value);
+    if (originCityEl.value.trim()) originCityEl.value = titleCase(originCityEl.value);
 
     const fd = new FormData(form);
     const payload = Object.fromEntries(fd.entries());
