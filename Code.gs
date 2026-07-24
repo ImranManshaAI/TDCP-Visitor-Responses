@@ -15,6 +15,9 @@
 
 var SHEET_NAME = 'Responses';
 
+// ⚠️ Must exactly match SHARED_KEY in form.html and dashboard.html
+var REQUIRED_KEY = 'tdcp-bwp-bus-desk';
+
 var HEADERS = [
   'S.No',
   'Office Visit Date',
@@ -22,13 +25,15 @@ var HEADERS = [
   'Phone Number',
   'Preferred Visit Date',
   'Group Size',
+  'Origin Country',
   'Origin City',
   'Email',
   'CNIC (Optional)',
   'Sites Selected',
   'Additional Service',
   'Additional Service Details',
-  'Remarks / Info Provided'
+  'Remarks / Info Provided',
+  'Logged By'
 ];
 
 function getSheet_() {
@@ -48,6 +53,12 @@ function doPost(e) {
   var out;
   try {
     var data = JSON.parse(e.postData.contents);
+
+    if (data.key !== REQUIRED_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Unauthorized' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     var sheet = getSheet_();
 
     // Serial number = count of existing rows below the header
@@ -64,13 +75,15 @@ function doPost(e) {
       data.contact || '',
       data.preferredDate || '',
       data.groupSize || '',
+      data.originCountry || '',
       data.origin || '',
       data.email || '',
       data.idNumber || '',
       sitesFormatted,
       data.additionalService || 'No',
       data.additionalServiceDetails || '',
-      data.remarks || ''
+      data.remarks || '',
+      data.loggedBy || ''
     ]);
 
     out = { status: 'success', serial: serial };
@@ -84,6 +97,11 @@ function doPost(e) {
 function doGet(e) {
   var out;
   try {
+    if (!e.parameter.key || e.parameter.key !== REQUIRED_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Unauthorized' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     var sheet = getSheet_();
     var values = sheet.getDataRange().getValues();
 
