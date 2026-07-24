@@ -110,9 +110,91 @@
   }
   .error{color:var(--rose);}
   code{background:rgba(30,27,22,0.06);padding:2px 6px;border-radius:4px;font-size:12.5px;}
+
+  /* Lock screen */
+  #lockScreen{
+    position:fixed; inset:0;
+    background:var(--navy);
+    z-index:999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #lockScreen .lock-card{
+    background:#fff;
+    border-radius:18px;
+    padding:40px 32px;
+    max-width:360px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 24px 48px -20px rgba(14,24,48,0.4);
+  }
+  #lockScreen .lock-eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 10px;
+  }
+  #lockScreen h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0 0 20px;
+    color:var(--navy);
+  }
+  #lockScreen input, #lockScreen select{
+    width:100%;
+    font-size:15px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    outline:none;
+    margin-bottom:14px;
+    text-align:center;
+    letter-spacing:2px;
+    box-sizing:border-box;
+  }
+  #lockScreen select{letter-spacing:normal;color:var(--ink);}
+  #lockScreen button{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:10px;
+    background:var(--navy);
+    color:#fff;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+  }
+  #lockScreen .lock-err{
+    color:var(--rose);
+    font-size:13px;
+    margin-top:12px;
+    display:none;
+  }
+  body.locked{overflow:hidden;}
 </style>
 </head>
 <body>
+
+<div id="lockScreen">
+  <div class="lock-card">
+    <p class="lock-eyebrow">TDCP · Restricted Access</p>
+    <h2>Staff Login Required</h2>
+    <form id="lockForm">
+      <select id="lockStaff" required>
+        <option value="" disabled selected>Select your name</option>
+      </select>
+      <input type="password" id="lockPass" placeholder="Enter your passcode" autocomplete="off">
+      <button type="submit">Unlock</button>
+      <p class="lock-err" id="lockErr">Incorrect passcode. Please try again.</p>
+    </form>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -129,6 +211,65 @@
 </div>
 
 <script>
+  // ⚠️ Must exactly match STAFF_USERS in form.html
+  const STAFF_USERS = {
+    "1111": "Imran Mansha",
+    "2222": "Staff Member 2",
+    "3333": "Staff Member 3"
+  };
+  // ⚠️ Must exactly match REQUIRED_KEY in Code.gs — this stops people from calling the backend URL directly.
+  const SHARED_KEY = "tdcp-bwp-bus-desk";
+
+  (function () {
+    const lockScreen = document.getElementById('lockScreen');
+    const lockForm = document.getElementById('lockForm');
+    const lockStaff = document.getElementById('lockStaff');
+    const lockPass = document.getElementById('lockPass');
+    const lockErr = document.getElementById('lockErr');
+    const SESSION_HOURS = 12;
+
+    Object.values(STAFF_USERS).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      lockStaff.appendChild(opt);
+    });
+
+    function isUnlocked() {
+      const t = localStorage.getItem('tdcp_unlocked_at');
+      const name = localStorage.getItem('tdcp_staff_name');
+      if (!t || !name) return false;
+      const hoursPassed = (Date.now() - Number(t)) / 36e5;
+      return hoursPassed < SESSION_HOURS;
+    }
+
+    if (isUnlocked()) {
+      lockScreen.style.display = 'none';
+      loadData();
+    } else {
+      document.body.classList.add('locked');
+    }
+
+    lockForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const enteredName = lockStaff.value;
+      const enteredPass = lockPass.value;
+      const validName = STAFF_USERS[enteredPass] === enteredName;
+
+      if (enteredName && validName) {
+        localStorage.setItem('tdcp_unlocked_at', String(Date.now()));
+        localStorage.setItem('tdcp_staff_name', enteredName);
+        lockScreen.style.display = 'none';
+        document.body.classList.remove('locked');
+        loadData();
+      } else {
+        lockErr.style.display = 'block';
+        lockPass.value = '';
+        lockPass.focus();
+      }
+    });
+  })();
+
   // ⚠️ Replace with your deployed Apps Script Web App URL (see SETUP_GUIDE.md)
   const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzgTvAq7nNLCltE0OJcYk0HlaEO7uwsyBca643BdVNiwmkQQn7rcmpRc80K8_TK3j7r/exec";
 
@@ -144,7 +285,7 @@
     }
 
     try {
-      const res = await fetch(ENDPOINT_URL);
+      const res = await fetch(ENDPOINT_URL + '?key=' + encodeURIComponent(SHARED_KEY));
       const data = await res.json();
       if (!Array.isArray(data)) throw new Error(data.message || 'Unexpected response');
       render(data);
@@ -229,7 +370,7 @@
         <div class="panel">
           <h2>Recent Entries</h2>
           <table>
-            <thead><tr><th>#</th><th>Visitor</th><th>Sites</th><th>Extra Svc</th></tr></thead>
+            <thead><tr><th>#</th><th>Visitor</th><th>Sites</th><th>Extra Svc</th><th>Logged By</th></tr></thead>
             <tbody>
               ${recent.map(r => `
                 <tr>
@@ -237,6 +378,7 @@
                   <td>${escapeHtml(r.Name || '—')}<br><span style="color:rgba(30,27,22,0.45);font-size:11.5px;">${escapeHtml(r['Origin City'] || '')}</span></td>
                   <td class="sites-cell">${escapeHtml(r['Sites Selected'] || '—')}</td>
                   <td><span class="pill ${String(r['Additional Service']).toLowerCase()==='yes' ? 'yes':'no'}">${escapeHtml(r['Additional Service'] || 'No')}</span></td>
+                  <td style="font-size:12.5px;color:rgba(30,27,22,0.6);">${escapeHtml(r['Logged By'] || '—')}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -313,8 +455,6 @@
       }
     });
   }
-
-  loadData();
 </script>
 
 </body>
